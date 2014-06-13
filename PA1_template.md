@@ -10,7 +10,8 @@ We load the data file (activity.csv, assuming it is in the same directory as the
 and we pre-process it for the subsequent analyses (e.g. trasforming the date column in a 
 Date type).
 
-```{r echo=TRUE}
+
+```r
 library(lattice)
 options(scipen=999)
 myData <- read.csv("activity.csv")
@@ -21,29 +22,41 @@ myData$date <- as.Date(myData$date)
 
 We remove the rows with NA value of steps and then plot a histogram with the total number of steps per day.
 
-```{r echo=TRUE}
+
+```r
 myDataNoNA <- subset(myData,!is.na(myData$steps))
 aggrData <- aggregate(myDataNoNA$steps,by=list(myDataNoNA$date),FUN="sum")
 with(aggrData,plot(Group.1,x,type="h",xlab="Date",ylab="Number of steps per day"))
+```
+
+![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2.png) 
+
+```r
 stepsDay <- aggrData$x
 avgStepsDay <- round(mean(stepsDay),digits=1)
 medianStepsDay <- median(stepsDay)
 ```
 
-We can see that the average number of steps taken per day is `r avgStepsDay` and the median is `r medianStepsDay`.
+We can see that the average number of steps taken per day is 10766.2 and the median is 10765.
 
 ### Part 3: Average daily activity pattern
 
 We make a time series plot of the 5-minute interval and the average number of steps taken, averaged across all days.
 
-```{r echo=TRUE}
+
+```r
 aggrDataInterval <- aggregate(myDataNoNA$steps,by=list(myDataNoNA$interval),FUN="mean")
 with(aggrDataInterval,plot(Group.1,x,type="l",xlab="Time interval",ylab="Average number of steps"))
+```
+
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3.png) 
+
+```r
 maxInterval <- which.max(aggrDataInterval$x)
 maxStepsInterval <- aggrDataInterval$x[which.max(aggrDataInterval$x)]
 ```
 
-We can see that the interval with the maximum number of steps in average is the interval `r maxInterval`, where the average number of steps taken is `r maxStepsInterval`.
+We can see that the interval with the maximum number of steps in average is the interval 104, where the average number of steps taken is 206.1698.
 
 ### Part 4: Treating missing value
 
@@ -52,7 +65,8 @@ Note that for each interval we have at least one day where the corresponding num
 
 We create a new data frame, equal to the original one, but with all the NA's replaced with the strategy explained above.
 
-```{r echo=TRUE}
+
+```r
 numberNArows <- sum(!complete.cases(myData))
 
 a <- myData$steps
@@ -69,17 +83,21 @@ differenceAvg <- round(abs((avgStepsDay-completeStepsAvg)/avgStepsDay)*100,digit
 differenceMedian <- round(abs((medianStepsDay-completeStepsMedian)/medianStepsDay)*100,digits=1)
 ```
 
-We plot a histogram of the total number of steps per day using the new data set with replaced values. We can see that the average number of steps taken per day is `r avgStepsDay` and the median is `r medianStepsDay`. This means that the difference for the average is of `r differenceAvg` steps for the average number of steps per day between the two data sets, and of `r differenceMedian` steps for the median, i.e. there is no difference. This makes sense, since we are replacing the missing value with the average of all the others, and since each time interval is observed for the same number of days.
+We plot a histogram of the total number of steps per day using the new data set with replaced values. We can see that the average number of steps taken per day is 10766.2 and the median is 10765. This means that the difference for the average is of 0 steps for the average number of steps per day between the two data sets, and of 0 steps for the median, i.e. there is no difference. This makes sense, since we are replacing the missing value with the average of all the others, and since each time interval is observed for the same number of days.
 
-```{r echo=TRUE}
+
+```r
 with(completeDataAggregated,plot(Group.1,x,type="h",xlab="Time interval",ylab="Average number of steps"))
 ```
+
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5.png) 
 
 ### Part 5: Activity patterns on weekdays and weekends
 
 We want to study differences in the activity patterns between weekdays and weekends. To do so we create a new factor variable (dayType) in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
 
-```{r echo=TRUE}
+
+```r
 myDataReplaced$dayType <- ifelse(weekdays(myDataReplaced$date) == "Saturday" | 
                                    weekdays(myDataReplaced$date) == "Sunday",
                                  "weekend","weekday")
@@ -88,7 +106,10 @@ myDataReplaced$dayType <- as.factor(myDataReplaced$dayType)
 
 Then we aggregate the data by time interval and day type and plot the average number of steps per time interval respectively on weekends and weekdays.
 
-```{r echo=TRUE}
+
+```r
 aggregatedDataIntervalDay <- aggregate(myDataReplaced$steps,by=list(myDataReplaced$interval,myDataReplaced$dayType),FUN="mean")
 with(aggregatedDataIntervalDay,xyplot(x~Group.1|Group.2,type="l",layout=c(1,2),xlab="Interval",ylab="Number of Steps"))
 ```
+
+![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7.png) 
